@@ -41,3 +41,23 @@ If the password is wrong, the file cannot be decrypted.
 
 ---
 
+
+---
+
+## Installation
+
+### Requirements
+- Python 3.8 or higher
+- pip
+
+### Setup
+
+```bash
+git clone https://github.com/Rupesh528/file-encrypter.git
+cd file-encrypter
+
+python3 -m venv venv
+source venv/bin/activate
+
+pip install cryptography
+```
