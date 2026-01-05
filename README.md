@@ -3,7 +3,6 @@
 This is a simple GUI-based file encryption tool written in Python.  
 It allows you to encrypt and decrypt **individual files in place** using a password.
 
-I built this project to understand how real-world file encryption works and to practice secure coding concepts used in cybersecurity.
 
 ---
 
@@ -14,7 +13,6 @@ I built this project to understand how real-world file encryption works and to p
 - Works with any file type (text files, images, PDFs, zip files, etc.)
 - Uses a minimal GUI so the focus stays on security, not UI complexity
 
-There is **no folder encryption** on purpose, to avoid accidental data loss or unsafe behavior.
 
 ---
 
@@ -61,3 +59,4 @@ source venv/bin/activate
 
 pip install cryptography
 ```
+- to run : python3 main.py
