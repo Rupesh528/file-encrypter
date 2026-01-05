@@ -1,8 +1,4 @@
-"""
-gui.py
-------
-Handles the Tkinter GUI and user interactions.
-"""
+
 
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
@@ -12,135 +8,111 @@ from crypto import encrypt_file_inplace, decrypt_file_inplace
 class FileEncrypterGUI:
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.selected_file = None
+        self.filepath = None
 
-        self._setup_ui()
-
-    def _setup_ui(self):
-        self.root.title("Secure File Encrypter (In-Place)")
-        self.root.geometry("600x380")
+        self.root.title("Secure File Encrypter")
+        self.root.geometry("500x300")
         self.root.resizable(False, False)
 
-        style = ttk.Style()
-        style.theme_use("clam")
+        self._build_ui()
 
+    def _build_ui(self):
         ttk.Label(
             self.root,
             text="Secure File Encrypter",
-            font=("Segoe UI", 18, "bold")
-        ).pack(pady=12)
-
-        card = ttk.Frame(self.root, padding=20)
-        card.pack(fill="x", padx=20)
+            font=("Segoe UI", 16, "bold")
+        ).pack(pady=10)
 
         self.path_var = tk.StringVar(value="No file selected")
-        ttk.Label(card, textvariable=self.path_var, wraplength=560).pack(pady=8)
+        ttk.Label(self.root, textvariable=self.path_var, wraplength=460)\
+            .pack(pady=5)
 
         ttk.Button(
-            card,
+            self.root,
             text="Select File",
-            width=22,
             command=self.select_file
-        ).pack(pady=8)
+        ).pack(pady=5)
 
-        ttk.Label(card, text="Password", font=("Segoe UI", 11)).pack(pady=(15, 5))
+        ttk.Label(self.root, text="Password").pack(pady=(10, 2))
 
-        pwd_frame = ttk.Frame(card)
-        pwd_frame.pack()
+        self.password = ttk.Entry(self.root, show="*", width=30)
+        self.password.pack()
 
-        self.password_entry = ttk.Entry(pwd_frame, width=32, show="*")
-        self.password_entry.grid(row=0, column=0, padx=5)
-
-        self.show_password = tk.BooleanVar()
+        self.show_pwd = tk.BooleanVar()
         ttk.Checkbutton(
-            pwd_frame,
-            text="Show",
-            variable=self.show_password,
+            self.root,
+            text="Show password",
+            variable=self.show_pwd,
             command=self.toggle_password
-        ).grid(row=0, column=1)
-
-        action_frame = ttk.Frame(card)
-        action_frame.pack(pady=20)
+        ).pack(pady=2)
 
         ttk.Button(
-            action_frame,
-            text="Encrypt (Overwrite)",
-            width=20,
-            command=self.encrypt_action
-        ).grid(row=0, column=0, padx=12)
+            self.root,
+            text="Encrypt",
+            command=self.encrypt
+        ).pack(pady=5)
 
         ttk.Button(
-            action_frame,
-            text="Decrypt (Overwrite)",
-            width=20,
-            command=self.decrypt_action
-        ).grid(row=0, column=1, padx=12)
+            self.root,
+            text="Decrypt",
+            command=self.decrypt
+        ).pack(pady=5)
 
-        self.status_var = tk.StringVar(value="Ready")
+        self.status = tk.StringVar(value="Ready")
         ttk.Label(
             self.root,
-            textvariable=self.status_var,
+            textvariable=self.status,
             relief="sunken",
-            anchor="w",
-            padding=5
+            anchor="w"
         ).pack(fill="x", side="bottom")
 
-    def set_status(self, text: str):
-        self.status_var.set(text)
-
     def select_file(self):
-        self.selected_file = filedialog.askopenfilename()
-        self.path_var.set(self.selected_file or "No file selected")
-        self.set_status("File selected" if self.selected_file else "Ready")
+        self.filepath = filedialog.askopenfilename()
+        self.path_var.set(self.filepath or "No file selected")
+        self.status.set("File selected" if self.filepath else "Ready")
 
-    def encrypt_action(self):
-        password = self.password_entry.get()
-
-        if not self.selected_file or not password:
-            messagebox.showerror("Error", "Select a file and enter password")
+    def encrypt(self):
+        pwd = self.password.get()
+        if not self._validate(pwd):
             return
 
-        if not messagebox.askyesno(
-            "Confirm Encryption",
-            f"This will ENCRYPT the original file:\n\n{self.selected_file}\n\nProceed?"
-        ):
+        if not messagebox.askyesno("Confirm", "Encrypt the original file?"):
             return
 
         try:
-            self.set_status("Encrypting...")
-            encrypt_file_inplace(self.selected_file, password)
-            messagebox.showinfo("Success", "File encrypted successfully")
-            self.set_status("Encryption completed")
+            self.status.set("Encrypting...")
+            encrypt_file_inplace(self.filepath, pwd)
+            self.status.set("Encryption completed")
+            messagebox.showinfo("Success", "File encrypted")
         except Exception as e:
             messagebox.showerror("Error", str(e))
-            self.set_status("Error occurred")
+            self.status.set("Error")
 
-    def decrypt_action(self):
-        password = self.password_entry.get()
-
-        if not self.selected_file or not password:
-            messagebox.showerror("Error", "Select a file and enter password")
+    def decrypt(self):
+        pwd = self.password.get()
+        if not self._validate(pwd):
             return
 
-        if not messagebox.askyesno(
-            "Confirm Decryption",
-            f"This will DECRYPT the original file:\n\n{self.selected_file}\n\nProceed?"
-        ):
+        if not messagebox.askyesno("Confirm", "Decrypt the original file?"):
             return
 
         try:
-            self.set_status("Decrypting...")
-            decrypt_file_inplace(self.selected_file, password)
-            messagebox.showinfo("Success", "File decrypted successfully")
-            self.set_status("Decryption completed")
+            self.status.set("Decrypting...")
+            decrypt_file_inplace(self.filepath, pwd)
+            self.status.set("Decryption completed")
+            messagebox.showinfo("Success", "File decrypted")
         except Exception:
-            messagebox.showerror(
-                "Error",
-                "Decryption failed.\nWrong password or file not encrypted."
-            )
-            self.set_status("Decryption failed")
+            messagebox.showerror("Error", "Wrong password or file not encrypted")
+            self.status.set("Failed")
 
     def toggle_password(self):
-        self.password_entry.config(
-            show="" if self.show_password.get() else "*"
-        )
+        self.password.config(show="" if self.show_pwd.get() else "*")
+
+    def _validate(self, pwd: str) -> bool:
+        if not self.filepath:
+            messagebox.showerror("Error", "No file selected")
+            return False
+        if not pwd:
+            messagebox.showerror("Error", "Password required")
+            return False
+        return True

@@ -1,8 +1,4 @@
-"""
-main.py
--------
-Application entry point.
-"""
+
 
 import tkinter as tk
 from gui import FileEncrypterGUI
